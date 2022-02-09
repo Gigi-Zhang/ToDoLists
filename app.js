@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const dotenv = require("dotenv");
 
 const app = express();
 
@@ -15,7 +16,16 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://admin:test2021@cluster0.rks7c.mongodb.net/todolistDB?retryWrites=true&w=majority");
+
+const { MongoClient } = require('mongodb');
+const uri = "mongodb+srv://ToDoLists:" + process.env.PASSWORD + "@cluster0.scrwm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+client.connect(err => {
+  const collection = client.db("test").collection("devices");
+  // perform actions on the collection object
+  client.close();
+});
+
 
 const itemSchema = new mongoose.Schema({
   name: String
