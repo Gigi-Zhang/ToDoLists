@@ -2,10 +2,17 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const dotenv = require("dotenv");
+const { MongoClient } = require('mongodb');
+require("dotenv").config();
+
+//connect database
+mongoose.connect(process.env.URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const connection = mongoose.connection;
+connection.once("open",()=>{
+  console.log("Connected database successfully");
+});
 
 const app = express();
 
@@ -15,17 +22,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(express.static("public"));
-
-
-const { MongoClient } = require('mongodb');
-const uri = "mongodb+srv://ToDoLists:" + process.env.PASSWORD + "@cluster0.scrwm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-client.connect(err => {
-  const collection = client.db("test").collection("devices");
-  // perform actions on the collection object
-  client.close();
-});
-
 
 const itemSchema = new mongoose.Schema({
   name: String
@@ -76,9 +72,8 @@ app.get("/", function(req, res) {
 });
 
 
-
-
 app.post("/", function(req, res) {
+  //get items from input
   const itemName = req.body.newItem;
   const listName = req.body.list;
 
@@ -87,6 +82,7 @@ app.post("/", function(req, res) {
   });
 
   if (listName === "Today") {
+    //save items in the default list "Today"
     item.save();
     res.redirect("/");
   } else {
